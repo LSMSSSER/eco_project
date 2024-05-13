@@ -1,6 +1,7 @@
 ﻿#include <iostream>
-#include <cmath> // Для использования функции округления
 #include <string>
+#include <cmath>
+#include <sqlite3.h>
 
 using namespace std;
 
@@ -8,8 +9,8 @@ class Truck {
 private:
     int truckCapacity;
     int WasteTruckConsumption;
-    float CO2Coefficient; 
-    float FuelDensity;
+    double CO2Coefficient;
+    double FuelDensity;
     int idleFuel;
     int workFuel;
     int warmUpTime;
@@ -33,9 +34,6 @@ public:
 
     void Input_values() {
         int choice_of_fuel;
-        int choiceBenz;
-        int choiceDiesel;
-        int choiceGas;
 
         cout << "Введите грузоподъемность мусоровоза в килограммах: ";
         cin >> truckCapacity;
@@ -50,94 +48,48 @@ public:
         cin >> warmUpTime;
 
         cout << "Укажите вид топлива для мусоровоза" << endl;
-        cout << "(0) - бензин" << endl;
-        cout << "(1) - дизель" << endl;
-        cout << "(2) - газ" << endl;
+        cout << "(1) - А-76" << endl;
+        cout << "(2) - АИ-92" << endl;
+        cout << "(3) - АИ-93" << endl;
+        cout << "(4) - АИ-95" << endl;
+        cout << "(5) - АИ-98" << endl;
+        cout << "(6) - зимний дизель" << endl;
+        cout << "(7) - летний дизель" << endl;
+        cout << "(8) - сжиженый нефтяной (пропан)" << endl;
+        cout << "(9) - сжиженый природный газ (спг)" << endl;
         cin >> choice_of_fuel;
 
-        switch (choice_of_fuel) {
-        case 0:
-            truck_fuel_energy = 33.5;
-            name_fuel = "benz";
-            cout << "Выберите марку бензина: " << endl;
-            cout << "(0) - А-76" << endl;
-            cout << "(1) - АИ-92" << endl;
-            cout << "(2) - АИ-93" << endl;
-            cout << "(3) - АИ-95" << endl;
-            cout << "(4) - АИ-98" << endl;
-            cin >> choiceBenz;
-            switch (choiceBenz) {
-            case 0:
-                CO2Coefficient = 3.149;
-                FuelDensity = 0.715;
-                break;
-            case 1:
-                CO2Coefficient = 3.149;
-                FuelDensity = 0.735;
-                break;
-            case 2:
-                CO2Coefficient = 3.149;
-                FuelDensity = 0.745;
-                break;
-            case 3:
-                CO2Coefficient = 3.149;
-                FuelDensity = 0.750;
-                break;
-            case 4:
-                CO2Coefficient = 3.149;
-                FuelDensity = 0.765;
-                break;
-            }
-            break;
-        case 1:
-            truck_fuel_energy = 43;
-            name_fuel = "diesel";
-            cout << "Выберите вид дизельного топлива: " << endl;
-            cout << "(0) - летний дизель" << endl;
-            cout << "(1) - зимний дизель" << endl;
-            cin >> choiceDiesel;
-            switch (choiceDiesel) {
-            case 0:
-                CO2Coefficient = 3.149;
-                FuelDensity = 0.860;
-                break;
-            case 1:
-                CO2Coefficient = 3.149;
-                FuelDensity = 0.840;
-                break;
-            }
-            break;
-        case 2:
-            truck_fuel_energy = 27;
-            name_fuel = "gas";
-            cout << "Выберите вид газ: " << endl;
-            cout << "(0) - сжиженый нефтяной (пропан)" << endl;
-            cout << "(1) - сжиженый природный газ (спг)" << endl;
-            cin >> choiceGas;
-            switch (choiceGas) {
-            case 0:
-                CO2Coefficient = 2.903;
-                FuelDensity = 0.528;
-                break;
-            case 1:
-                CO2Coefficient = 2.710;
-                FuelDensity = 0.424;
-                break;
-            }
-            break;
+        sqlite3* db;
+        int rc = sqlite3_open("trucks.db", &db);
+        const char* sqlSelect = "SELECT name, co2_coefficient, fuel_density FROM fuel WHERE id = ?;";
+        sqlite3_stmt* stmt;
+        rc = sqlite3_prepare_v2(db, sqlSelect, -1, &stmt, nullptr);
+
+        sqlite3_bind_int(stmt, 1, choice_of_fuel);
+
+        while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+            const char* name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+            double co2Coefficient = sqlite3_column_double(stmt, 1);
+            double fuelDensity = sqlite3_column_double(stmt, 2);
+
+            CO2Coefficient = co2Coefficient;
+            FuelDensity = fuelDensity;
+            name_fuel = name;
         }
 
         cout << "Введите расход топлива при работе оборудования (л/ч): ";
         cin >> workFuel;
+        sqlite3_finalize(stmt);
+        sqlite3_close(db);
     }
 
     int getTruckCapacity() const { return truckCapacity; }
 
     int getWasteTruckConsumption() const { return WasteTruckConsumption; }
 
-    float getCO2Coefficient() const { return CO2Coefficient; }
+    double getCO2Coefficient() const { return CO2Coefficient; }
 
-    float getFuelDensity() const { return FuelDensity; }
+    double getFuelDensity() const { return FuelDensity; }
 
     int getIdleFuel() const { return idleFuel; }
 
@@ -163,7 +115,7 @@ public:
 class Population {
 private:
     int population;
-    float accumulationNorm; 
+    double accumulationNorm;
     float additionalPercentage;
 public:
     Population() {
@@ -254,11 +206,12 @@ float recalculation(Truck& a) {
         fuel_energy = a.getWasteTruckConsumption() / 100 * a.get_fuel_energy();
         return (fuel_energy / gas);
         break;
-    }    
+    }
 }
 
 int main() {
     system("chcp 1251 > null");
+
     float RouteLength, workTime, TotalWaste, Emissions, idleConsumption, workConsumption, warmUpConsumption, summa;
     long trips111;
 
@@ -312,7 +265,3 @@ int main() {
     cout << recalculation(trc) << endl;
     return 0;
 }
-
-
-
-//workuptime плотность топлива 

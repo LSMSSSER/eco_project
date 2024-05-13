@@ -19,4 +19,20 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\libb\sqlite3.dll" />
+    <None Include="sqlite3.dll" />
+    <None Include="sqlite3.def">
+      <Filter>Исходные файлы</Filter>
+    </None>
+    <None Include="..\sqlite3.dll" />
+    <None Include="..\sqlite3.def">
+      <Filter>Исходные файлы</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SQLite\sqlite3.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

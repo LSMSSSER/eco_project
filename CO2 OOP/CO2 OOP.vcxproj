@@ -104,10 +104,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\User\source\repos\eco_project\CO2 OOP\SQLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\User\source\repos\eco_project\CO2 OOP\SQLite;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -128,6 +131,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CO2 OOP.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\libb\sqlite3.dll" />
+    <None Include="..\sqlite3.def" />
+    <None Include="..\sqlite3.dll" />
+    <None Include="sqlite3.def" />
+    <None Include="sqlite3.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SQLite\sqlite3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
