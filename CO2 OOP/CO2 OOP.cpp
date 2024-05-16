@@ -34,6 +34,7 @@ public:
 
     void Input_values() {
         int choice_of_fuel;
+        system("chcp 1251 > null");
 
         cout << "Введите грузоподъемность мусоровоза в килограммах: ";
         cin >> truckCapacity;
@@ -130,6 +131,8 @@ public:
         int choice;
         int choice1;
 
+        system("chcp 1251 > null");
+
         cout << "Введите число жителей: ";
         cin >> population;
 
@@ -180,33 +183,40 @@ public:
 
 float recalculation(Truck& a) {
     int choice;
+    double fe;
     float benzin = 33.5;
     float diesel = 43;
     float gas = 36.12;
     float fuel_energy;
+    double fuel_energy11;
 
     cout << "Вы используете: " << a.get_name_fuel() << endl;
 
     cout << "Для какого вида топлива нужен перерасчет?" << endl;
-    cout << "(1) - Бензин" << endl;
-    cout << "(2) - Дизель" << endl;
-    cout << "(3) - Газ" << endl;
+    cout << "(0) - Бензин" << endl;
+    cout << "(1) - Дизель" << endl;
+    cout << "(2) - Газ" << endl;
 
     cin >> choice;
-    switch (choice) {
-    case 1:
-        fuel_energy = a.getWasteTruckConsumption() / 100 * a.get_fuel_energy();
-        return (fuel_energy / benzin);
-        break;
-    case 2:
-        fuel_energy = a.getWasteTruckConsumption() / 100 * a.get_fuel_energy();
-        return (fuel_energy / diesel);
-        break;
-    case 3:
-        fuel_energy = a.getWasteTruckConsumption() / 100 * a.get_fuel_energy();
-        return (fuel_energy / gas);
-        break;
+
+    sqlite3* db;
+    int rc = sqlite3_open("trucks.db", &db);
+    const char* sqlSelect = "SELECT fuel_energy FROM fuel WHERE fuel_type = ?;";
+    sqlite3_stmt* stmt;
+    rc = sqlite3_prepare_v2(db, sqlSelect, -1, &stmt, nullptr);
+
+    sqlite3_bind_int(stmt, 1, choice);
+
+    while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+        fuel_energy11 = sqlite3_column_double(stmt, 0);
     }
+
+    fuel_energy = a.getWasteTruckConsumption() / 100 * a.get_fuel_energy();
+    return (fuel_energy / fuel_energy11);
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+
 }
 
 int main() {
